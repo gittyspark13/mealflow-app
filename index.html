@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MealFlow — Stop Winging Dinner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F7F3EC;
+      --warm-white: #FDFAF5;
+      --bark: #2C2416;
+      --moss: #3D5A3E;
+      --gold: #C8933A;
+      --rust: #B85C38;
+      --sage: #7A9E7E;
+      --dust: #D4C9B0;
+      --muted: #8A7D68;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--bark);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(247,243,236,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(196,180,152,0.25);
+    }
+    .logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; color: var(--bark); text-decoration: none; }
+    .logo span { color: var(--moss); }
+    .nav-cta {
+      background: var(--bark); color: var(--cream);
+      padding: 10px 22px; border-radius: 100px;
+      font-size: 13px; font-weight: 500; text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.2px;
+    }
+    .nav-cta:hover { background: var(--moss); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 120px 48px 80px;
+      gap: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 70% 50%, rgba(125,160,130,0.10) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 60% at 20% 80%, rgba(200,147,58,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(61,90,62,0.10); border: 1px solid rgba(61,90,62,0.2);
+      color: var(--moss); padding: 5px 14px 5px 8px; border-radius: 100px;
+      font-size: 12px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeUp 0.7s ease both;
+    }
+    .eyebrow-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--moss); }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(48px, 5vw, 72px);
+      font-weight: 700;
+      line-height: 1.06;
+      letter-spacing: -1.5px;
+      margin-bottom: 22px;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+    .hero h1 em { font-style: italic; color: var(--moss); }
+    .hero h1 .strike {
+      position: relative; color: var(--muted);
+    }
+    .hero h1 .strike::after {
+      content: '';
+      position: absolute; left: 0; right: 0; top: 55%;
+      height: 2.5px; background: var(--rust); border-radius: 2px;
+      animation: strikeIn 0.5s 0.9s ease both;
+    }
+
+    .hero-sub {
+      font-size: 17px; line-height: 1.65; color: var(--muted); max-width: 440px;
+      margin-bottom: 36px;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex; align-items: center; gap: 20px;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+    .btn-primary {
+      background: var(--bark); color: var(--cream);
+      padding: 15px 32px; border-radius: 100px;
+      font-size: 15px; font-weight: 500; text-decoration: none;
+      transition: all 0.2s; display: inline-flex; align-items: center; gap: 10px;
+      box-shadow: 0 4px 20px rgba(44,36,22,0.2);
+    }
+    .btn-primary:hover { background: var(--moss); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(44,36,22,0.22); }
+    .btn-primary .arrow { transition: transform 0.2s; }
+    .btn-primary:hover .arrow { transform: translateX(3px); }
+    .price-note { font-size: 13px; color: var(--muted); }
+    .price-note strong { color: var(--bark); font-size: 18px; }
+
+    /* Hero visual */
+    .hero-visual {
+      position: relative;
+      animation: fadeUp 0.8s 0.15s ease both;
+    }
+    .meal-mockup {
+      background: var(--warm-white);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(44,36,22,0.12), 0 4px 16px rgba(44,36,22,0.06);
+      border: 1px solid rgba(196,180,152,0.3);
+    }
+    .mock-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px; padding-bottom: 14px;
+      border-bottom: 1px solid rgba(196,180,152,0.3);
+    }
+    .mock-logo { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 700; color: var(--bark); }
+    .mock-week { display: flex; gap: 6px; }
+    .wk { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+    .wk.active { background: var(--bark); color: var(--cream); }
+    .wk.inactive { background: #EDE8DF; color: var(--muted); }
+    .mock-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .mock-day-label { text-align: center; font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1.5px solid #E5DFD0; }
+    .mock-card { border-radius: 7px; padding: 7px 7px 6px; margin-bottom: 4px; }
+    .mock-card.b { background: #FFF3E0; }
+    .mock-card.l { background: #E8F5E9; }
+    .mock-card.d { background: #EDE7F6; }
+    .mock-dot { width: 5px; height: 5px; border-radius: 50%; margin-bottom: 3px; }
+    .b .mock-dot { background: #FFB300; }
+    .l .mock-dot { background: #43A047; }
+    .d .mock-dot { background: #7B1FA2; }
+    .mock-line { height: 4px; border-radius: 2px; background: rgba(0,0,0,0.12); margin-bottom: 2px; }
+    .mock-line.short { width: 60%; }
+
+    /* floating badges */
+    .badge-float {
+      position: absolute;
+      background: var(--warm-white); border-radius: 12px; padding: 10px 14px;
+      box-shadow: 0 6px 24px rgba(44,36,22,0.12);
+      border: 1px solid rgba(196,180,152,0.3);
+      font-size: 12px; font-weight: 500; color: var(--bark);
+      display: flex; align-items: center; gap: 8px;
+      animation: float 4s ease-in-out infinite;
+    }
+    .badge-float.b1 { top: -14px; right: -10px; animation-delay: 0s; }
+    .badge-float.b2 { bottom: 20px; left: -24px; animation-delay: 1.5s; }
+    .badge-num { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: var(--moss); }
+
+    /* ── SOCIAL PROOF ── */
+    .social-strip {
+      background: var(--bark); color: var(--cream);
+      padding: 18px 48px;
+      display: flex; align-items: center; justify-content: center; gap: 48px;
+      flex-wrap: wrap;
+    }
+    .social-stat { text-align: center; }
+    .social-stat .num { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; color: var(--gold); }
+    .social-stat .label { font-size: 11px; color: rgba(253,250,245,0.6); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 1px; }
+    .divider { width: 1px; height: 36px; background: rgba(255,255,255,0.12); }
+
+    /* ── PROBLEM ── */
+    .problem {
+      padding: 100px 48px;
+      max-width: 900px; margin: 0 auto;
+      text-align: center;
+    }
+    .section-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--rust); margin-bottom: 16px;
+    }
+    .problem h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 3.5vw, 50px);
+      font-weight: 700; line-height: 1.12; letter-spacing: -0.8px;
+      margin-bottom: 20px;
+    }
+    .problem p { font-size: 17px; color: var(--muted); line-height: 1.7; max-width: 620px; margin: 0 auto 48px; }
+    .pain-cards {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    }
+    .pain-card {
+      background: var(--warm-white); border-radius: 16px; padding: 24px;
+      border: 1px solid rgba(196,180,152,0.25);
+      text-align: left;
+    }
+    .pain-emoji { font-size: 28px; margin-bottom: 12px; }
+    .pain-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 7px; color: var(--bark); }
+    .pain-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── FEATURES ── */
+    .features {
+      padding: 100px 48px;
+      background: var(--bark);
+      color: var(--cream);
+    }
+    .features-inner { max-width: 1100px; margin: 0 auto; }
+    .features-header { text-align: center; margin-bottom: 60px; }
+    .features-header .section-label { color: var(--gold); }
+    .features-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 3.5vw, 50px);
+      font-weight: 700; line-height: 1.1; letter-spacing: -0.8px;
+      color: var(--cream);
+    }
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px;
+    }
+    .feature-item {
+      padding: 36px 40px;
+      border: 1px solid rgba(255,255,255,0.07);
+      position: relative; overflow: hidden;
+      transition: background 0.25s;
+    }
+    .feature-item:hover { background: rgba(255,255,255,0.04); }
+    .feature-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 60px; font-weight: 700;
+      color: rgba(200,147,58,0.15); line-height: 1;
+      position: absolute; top: 20px; right: 28px;
+    }
+    .feature-icon { font-size: 26px; margin-bottom: 14px; }
+    .feature-item h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; color: var(--cream); }
+    .feature-item p { font-size: 14px; color: rgba(253,250,245,0.55); line-height: 1.65; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials { padding: 100px 48px; max-width: 1100px; margin: 0 auto; }
+    .testimonials .section-label { text-align: center; color: var(--rust); margin-bottom: 14px; }
+    .testimonials h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(30px, 3vw, 46px); font-weight: 700;
+      letter-spacing: -0.6px; text-align: center; margin-bottom: 50px;
+    }
+    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .testi-card {
+      background: var(--warm-white); border-radius: 18px; padding: 28px;
+      border: 1px solid rgba(196,180,152,0.25);
+      position: relative;
+    }
+    .testi-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 46px; font-weight: 700; color: var(--dust);
+      line-height: 1; margin-bottom: -8px;
+    }
+    .testi-text { font-size: 14px; line-height: 1.7; color: #4a4030; margin-bottom: 18px; }
+    .testi-author { display: flex; align-items: center; gap: 10px; }
+    .testi-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .testi-name { font-size: 13px; font-weight: 600; color: var(--bark); }
+    .testi-role { font-size: 11px; color: var(--muted); }
+    .stars { color: #F59E0B; font-size: 12px; margin-bottom: 12px; letter-spacing: 1px; }
+
+    /* ── PRICING ── */
+    .pricing {
+      padding: 100px 48px;
+      background: linear-gradient(160deg, #2C2416 0%, #3D2E14 100%);
+    }
+    .pricing-inner { max-width: 680px; margin: 0 auto; text-align: center; }
+    .pricing .section-label { color: var(--gold); }
+    .pricing h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 3.5vw, 52px); font-weight: 700;
+      color: var(--cream); letter-spacing: -0.8px; margin-bottom: 16px;
+    }
+    .pricing-sub { font-size: 16px; color: rgba(253,250,245,0.55); margin-bottom: 48px; }
+
+    .price-card {
+      background: var(--warm-white); border-radius: 24px; padding: 44px 48px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+      position: relative; overflow: hidden;
+    }
+    .price-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--moss), var(--gold));
+    }
+    .price-tag {
+      display: flex; align-items: baseline; justify-content: center; gap: 4px;
+      margin-bottom: 8px;
+    }
+    .price-currency { font-size: 24px; font-weight: 600; color: var(--muted); align-self: flex-start; margin-top: 8px; }
+    .price-amount { font-family: 'Cormorant Garamond', serif; font-size: 80px; font-weight: 700; color: var(--bark); line-height: 1; letter-spacing: -3px; }
+    .price-once { font-size: 13px; color: var(--muted); margin-bottom: 30px; }
+    .price-once del { color: #C0B8A8; }
+
+    .feature-list { list-style: none; text-align: left; margin-bottom: 32px; display: grid; gap: 11px; }
+    .feature-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--bark); }
+    .check { width: 20px; height: 20px; border-radius: 50%; background: var(--moss); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .check svg { width: 10px; height: 10px; fill: none; stroke: #fff; stroke-width: 2.5; }
+
+    .btn-buy {
+      display: block; width: 100%; padding: 17px;
+      background: var(--bark); color: var(--cream); border: none;
+      border-radius: 100px; font-family: 'DM Sans', sans-serif;
+      font-size: 16px; font-weight: 500; cursor: pointer;
+      text-decoration: none; text-align: center;
+      transition: all 0.2s;
+      box-shadow: 0 6px 24px rgba(44,36,22,0.2);
+    }
+    .btn-buy:hover { background: var(--moss); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(44,36,22,0.25); }
+    .guarantee { font-size: 12px; color: var(--muted); margin-top: 16px; }
+
+    /* ── FAQ ── */
+    .faq { padding: 100px 48px; max-width: 700px; margin: 0 auto; }
+    .faq .section-label { color: var(--rust); margin-bottom: 14px; }
+    .faq h2 { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 700; letter-spacing: -0.6px; margin-bottom: 40px; }
+    .faq-item { border-bottom: 1px solid rgba(196,180,152,0.35); padding: 20px 0; }
+    .faq-q { font-size: 15px; font-weight: 600; margin-bottom: 9px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .faq-q:hover { color: var(--moss); }
+    .faq-a { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bark); color: rgba(253,250,245,0.45);
+      padding: 32px 48px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    footer .logo { color: rgba(253,250,245,0.7); font-size: 18px; }
+    footer p { font-size: 12px; }
+    footer a { color: rgba(253,250,245,0.45); text-decoration: none; }
+    footer a:hover { color: var(--gold); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes strikeIn {
+      from { transform: scaleX(0); transform-origin: left; }
+      to { transform: scaleX(1); transform-origin: left; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+      .hero-visual { display: none; }
+      .social-strip { gap: 28px; padding: 20px 24px; }
+      .divider { display: none; }
+      .problem, .features, .testimonials, .pricing, .faq { padding: 72px 24px; }
+      .pain-cards, .testi-grid { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .price-card { padding: 32px 24px; }
+      footer { padding: 24px; flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="logo">Meal<span>Flow</span></a>
+    <a href="#pricing" class="nav-cta">Get Instant Access →</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <div class="hero-eyebrow"><span class="eyebrow-dot"></span>For households on a $100–150/week budget</div>
+      <h1>Stop <span class="strike">winging</span><br/>dinner every<br/><em>single week.</em></h1>
+      <p class="hero-sub">A complete 4-week rotating meal system with grocery lists, pantry tracker, and waste logger — designed for real families who want to eat well without blowing the budget.</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn-primary">Get MealFlow <span class="arrow">→</span></a>
+        <div class="price-note">One-time <strong>$19</strong> — no subscription</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="badge-float b1">🥗 <div><div style="font-weight:700;font-size:13px;">Week 2 planned</div><div style="font-size:11px;color:#888">in 3 minutes</div></div></div>
+      <div class="badge-float b2"><div class="badge-num">$47</div> <div><div style="font-weight:700;font-size:13px;">saved last month</div><div style="font-size:11px;color:#888">in food waste</div></div></div>
+      <div class="meal-mockup">
+        <div class="mock-header">
+          <div class="mock-logo">🥦 MealFlow</div>
+          <div class="mock-week">
+            <div class="wk inactive">1</div><div class="wk active">2</div>
+            <div class="wk inactive">3</div><div class="wk inactive">4</div>
+          </div>
+        </div>
+        <div class="mock-grid">
+          <!-- Day labels -->
+          <div class="mock-day-label">Mon</div><div class="mock-day-label">Tue</div><div class="mock-day-label">Wed</div>
+          <div class="mock-day-label">Thu</div><div class="mock-day-label">Fri</div><div class="mock-day-label">Sat</div><div class="mock-day-label">Sun</div>
+          <!-- Breakfast row -->
+          <div class="mock-card b"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card b"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card b"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card b"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card b"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card b"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card b"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <!-- Lunch row -->
+          <div class="mock-card l"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card l"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card l"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card l"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card l"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card l"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card l"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <!-- Dinner row -->
+          <div class="mock-card d"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card d"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card d"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card d"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card d"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card d"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          <div class="mock-card d"><div class="mock-dot"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF STRIP -->
+  <div class="social-strip">
+    <div class="social-stat"><div class="num">4 Weeks</div><div class="label">Pre-planned meals</div></div>
+    <div class="divider"></div>
+    <div class="social-stat"><div class="num">84 Meals</div><div class="label">Breakfast, lunch & dinner</div></div>
+    <div class="divider"></div>
+    <div class="social-stat"><div class="num">$100–150</div><div class="label">Weekly target budget</div></div>
+    <div class="divider"></div>
+    <div class="social-stat"><div class="num">5 min</div><div class="label">To generate your grocery list</div></div>
+  </div>
+
+  <!-- PROBLEM -->
+  <section class="problem">
+    <div class="section-label reveal">Sound Familiar?</div>
+    <h2 class="reveal">The 6pm spiral is costing<br/>you more than you think.</h2>
+    <p class="reveal">Most households spend $200–400/month extra on food just from poor planning — impulse orders, forgotten produce, and the "I don't know what to make" takeout tax.</p>
+    <div class="pain-cards">
+      <div class="pain-card reveal">
+        <div class="pain-emoji">😩</div>
+        <h3>"What's for dinner?" every. single. night.</h3>
+        <p>Decision fatigue after a full workday leads to expensive defaults — DoorDash, pizza, random pantry dumps.</p>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-emoji">🥬</div>
+        <h3>Wilted spinach and forgotten yogurt</h3>
+        <p>The average household wastes $1,500/year in food. You buy it with good intentions and find it a week later.</p>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-emoji">🛒</div>
+        <h3>Grocery runs without a real plan</h3>
+        <p>You wander the store buying "what looks good" and leave $180 lighter with nothing that actually goes together.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="features-inner">
+      <div class="features-header reveal">
+        <div class="section-label">What's Inside</div>
+        <h2>Everything in one tab.<br/>Nothing you don't need.</h2>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-item reveal">
+          <div class="feature-number">01</div>
+          <div class="feature-icon">📅</div>
+          <h3>4-Week Rotating Meal Planner</h3>
+          <p>84 pre-planned meals across 4 full weeks — breakfast, lunch, and dinner — with prep times and per-meal cost estimates. Click any card to swap a meal to your taste.</p>
+        </div>
+        <div class="feature-item reveal">
+          <div class="feature-number">02</div>
+          <div class="feature-icon">🛒</div>
+          <h3>Auto-Generated Grocery List</h3>
+          <p>Every week has a complete, tap-to-check grocery list. Items already in your pantry are automatically highlighted so you never double-buy.</p>
+        </div>
+        <div class="feature-item reveal">
+          <div class="feature-number">03</div>
+          <div class="feature-icon">🥦</div>
+          <h3>Pantry Inventory Tracker</h3>
+          <p>Log what you have at home. The app cross-references your pantry against weekly shopping lists and flags what you can skip — saving $15–30 each trip.</p>
+        </div>
+        <div class="feature-item reveal">
+          <div class="feature-number">04</div>
+          <div class="feature-icon">📊</div>
+          <h3>Food Waste & Budget Tracker</h3>
+          <p>Log what you throw out, see your waste cost over time, and watch your weekly spend vs. budget in real time. The data to finally break the cycle.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials">
+    <div class="section-label">Real People</div>
+    <h2 class="reveal">Families who stopped<br/>guessing at 6pm.</h2>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <div class="stars">★★★★★</div>
+        <div class="testi-quote">"</div>
+        <p class="testi-text">We were spending $280/week on groceries and still ordering pizza twice a week. After one month with MealFlow we're at $148 and actually eating better.</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#3D5A3E;">S</div>
+          <div><div class="testi-name">Sarah K.</div><div class="testi-role">Mom of 2, Houston TX</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="stars">★★★★★</div>
+        <div class="testi-quote">"</div>
+        <p class="testi-text">The waste tracker was an eye-opener. I was throwing away $60/month in produce alone. Now I actually cook what I buy.</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#B85C38;">M</div>
+          <div><div class="testi-name">Marcus T.</div><div class="testi-role">Teacher, Atlanta GA</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="stars">★★★★★</div>
+        <div class="testi-quote">"</div>
+        <p class="testi-text">Sunday used to stress me out. Now I open MealFlow, check the grocery list, and I'm done planning for the week in under 10 minutes.</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#7A6B4F;">J</div>
+          <div><div class="testi-name">Jamie L.</div><div class="testi-role">Nurse, Chicago IL</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="pricing-inner">
+      <div class="section-label reveal">Simple Pricing</div>
+      <h2 class="reveal">Pay once. Use forever.</h2>
+      <p class="pricing-sub reveal">No subscription. No monthly fees. No upsells. Just a tool that works.</p>
+      <div class="price-card reveal">
+        <div class="price-tag">
+          <span class="price-currency">$</span>
+          <span class="price-amount">19</span>
+        </div>
+        <div class="price-once">One-time payment &nbsp;·&nbsp; <del>was $39</del> &nbsp;·&nbsp; Instant access</div>
+        <ul class="feature-list">
+          <li><span class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>4-week rotating meal planner (84 meals)</li>
+          <li><span class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Auto-generated weekly grocery lists</li>
+          <li><span class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Pantry inventory tracker with grocery sync</li>
+          <li><span class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Food waste & budget tracker</li>
+          <li><span class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Fully editable meals — customize any card</li>
+          <li><span class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Works on phone, tablet, and desktop</li>
+          <li><span class="check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>All future updates included, free</li>
+        </ul>
+        <a href="YOUR_GUMROAD_OR_STRIPE_LINK" class="btn-buy">Get Instant Access for $19 →</a>
+        <p class="guarantee">🔒 30-day money-back guarantee. If it doesn't save you money, you pay nothing.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq">
+    <div class="section-label">FAQs</div>
+    <h2 class="reveal">Questions answered.</h2>
+
+    <div class="faq-item reveal">
+      <div class="faq-q">What exactly do I get after purchasing? <span>+</span></div>
+      <div class="faq-a">Instant access to the MealFlow web app — no download, no install. Open it in any browser on any device and start planning your first week in minutes.</div>
+    </div>
+    <div class="faq-item reveal">
+      <div class="faq-q">Can I customize the meals to my diet? <span>+</span></div>
+      <div class="faq-a">Yes. Click any meal card to replace it with whatever you'd like. The system is fully editable so you can tailor it to vegetarian, halal, gluten-free, or any preference.</div>
+    </div>
+    <div class="faq-item reveal">
+      <div class="faq-q">Is this a subscription? <span>+</span></div>
+      <div class="faq-a">No. You pay $19 once and own it forever. No recurring charges, no paywalled features, no premium tier.</div>
+    </div>
+    <div class="faq-item reveal">
+      <div class="faq-q">What if it doesn't work for me? <span>+</span></div>
+      <div class="faq-a">Email within 30 days for a full refund, no questions asked. The goal is to save you money — if it doesn't, you shouldn't pay for it.</div>
+    </div>
+    <div class="faq-item reveal">
+      <div class="faq-q">How many people is this designed for? <span>+</span></div>
+      <div class="faq-a">The default setup targets households of 2–4 people on a $100–150/week grocery budget. The budget target is adjustable and all meal quantities can be scaled up or down.</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="logo">Meal<span style="color:var(--gold)">Flow</span></a>
+    <p>© 2025 MealFlow · <a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="mailto:hello@mealflow.co">hello@mealflow.co</a></p>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 60);
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // FAQ toggle
+    document.querySelectorAll('.faq-q').forEach(q => {
+      q.addEventListener('click', () => {
+        const a = q.nextElementSibling;
+        const isOpen = a.style.display === 'block';
+        document.querySelectorAll('.faq-a').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.faq-q span').forEach(el => el.textContent = '+');
+        if (!isOpen) { a.style.display = 'block'; q.querySelector('span').textContent = '−'; }
+      });
+    });
+    // Hide all FAQ answers by default
+    document.querySelectorAll('.faq-a').forEach(el => el.style.display = 'none');
+  </script>
+</body>
+</html>
